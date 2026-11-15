@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChakraSat · El suelo de la chakra, visto desde el espacio</title>
+<meta name="description" content="ChakraSat usa datos de la NASA para elegir rotaciones que protejan el suelo de las chakras amazónicas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ================= Identidad ChakraSat =================
+   selva #06140D / #0E2A1C · bosque #1F5A3D · hoja #3B8F4F · brote #7BD88F
+   río #2B6F98 · óxido #B3412A (solo estrés) · ocre #D9A441 · neblina #EEF2EC */
+:root{
+  --selva:#06140D; --selva-2:#0E2A1C; --bosque:#1F5A3D; --hoja:#3B8F4F; --brote:#7BD88F;
+  --rio:#2B6F98; --rio-claro:#6FB3DC; --oxido:#B3412A; --oxido-claro:#E0664C; --ocre:#D9A441;
+  --neblina:#EEF2EC; --tinta:#13241A; --tinta-2:#55665C; --linea:#D3DCD4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:var(--neblina);color:var(--tinta);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body.bloqueado{overflow:hidden}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--rio-claro);outline-offset:3px}
+
+/* ---------- Intro ---------- */
+#intro{position:fixed;inset:0;z-index:100;background:var(--neblina);display:grid;place-items:center;transition:opacity .8s ease,visibility .8s}
+#intro.fuera{opacity:0;visibility:hidden}
+.carga{position:absolute;display:flex;flex-direction:column;align-items:flex-end;gap:8px;transition:opacity .4s}
+.carga__pct{font-family:var(--mono);font-size:14px;color:var(--bosque)}
+.carga__barra{display:flex;gap:3px}
+.carga__barra i{width:5px;height:10px;background:var(--linea);border-radius:1px}
+.carga__barra i.on{background:var(--hoja)}
+.saludo{font-family:var(--mono);font-size:clamp(48px,9vw,120px);font-weight:500;color:var(--selva-2);letter-spacing:-.02em;opacity:0;transition:opacity .4s}
+.saludo .cursor{display:inline-block;width:.06em;height:.9em;background:var(--selva-2);margin-left:.08em;vertical-align:-.08em;animation:parpadeo 1s steps(1) infinite}
+@keyframes parpadeo{50%{opacity:0}}
+.desliza{position:absolute;bottom:36px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--tinta-2);opacity:0;transition:opacity .6s;background:none;border:0}
+.saltar{position:absolute;top:24px;right:28px;font-family:var(--mono);font-size:12px;color:var(--tinta-2);background:none;border:0;text-decoration:underline}
+
+/* ---------- Barra superior ---------- */
+.barra{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:16px 4vw;transition:background .3s,color .3s}
+.barra.oscura{color:#fff}
+.barra.solida{background:rgba(238,242,236,.86);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,.05)}
+.barra.oscura.solida{background:rgba(6,20,13,.78);border-bottom-color:rgba(255,255,255,.06)}
+.marca{display:flex;align-items:center;gap:10px;text-decoration:none}
+.marca b{font-weight:900;font-size:19px;letter-spacing:-.03em}
+.marca small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;opacity:.65}
+.barra nav{display:flex;gap:6px}
+.barra nav a{text-decoration:none;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;opacity:.8}
+.barra nav a:hover{opacity:1;background:rgba(127,127,127,.12)}
+.barra nav a.app{background:var(--bosque);color:#fff;opacity:1}
+
+/* ---------- Portada ---------- */
+.portada{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:4vw;padding:110px 6vw 60px}
+.etiqueta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--hoja);display:flex;align-items:center;gap:10px}
+.etiqueta::before{content:"";width:28px;height:1px;background:currentColor}
+.portada h1{font-size:clamp(40px,5.6vw,84px);line-height:.98;letter-spacing:-.045em;font-weight:900;margin:18px 0 22px;color:var(--selva-2)}
+.portada h1 em{font-style:italic;color:var(--oxido)}
+.portada p{font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--tinta-2);max-width:46ch;margin:0 0 30px}
+.botones{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:12px;font-weight:700;text-decoration:none;border:1px solid transparent;transition:transform .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn--oscuro{background:var(--selva-2);color:#fff}
+.btn--linea{border-color:var(--linea);color:var(--tinta);background:#fff}
+.btn--claro{background:#fff;color:var(--selva)}
+.meta{display:flex;gap:18px;margin-top:34px;font-family:var(--mono);font-size:11px;color:var(--tinta-2);letter-spacing:.04em;flex-wrap:wrap}
+.meta span+span::before{content:"/";margin-right:18px;opacity:.5}
+
+/* Anillo del año */
+.anillo{position:relative;aspect-ratio:1;max-width:520px;width:100%;justify-self:center;cursor:grab;touch-action:none;user-select:none}
+.anillo:active{cursor:grabbing}
+.anillo svg{width:100%;height:100%;overflow:visible}
+.anillo .seg{transition:opacity .2s, transform .2s;transform-origin:center}
+.anillo .seg:hover,.anillo .seg.activo{opacity:1!important}
+.anillo__centro{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
+.anillo__centro b{display:block;font-size:clamp(36px,4.2vw,58px);font-weight:900;letter-spacing:-.04em;line-height:1;color:var(--selva-2)}
+.anillo__centro span{display:block;font-size:14px;color:var(--tinta-2);margin-top:8px;max-width:20ch}
+.anillo__ayuda{position:absolute;bottom:-28px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--tinta-2)}
+
+/* ---------- Capítulos oscuros ---------- */
+.historia{position:relative;background:radial-gradient(1200px 800px at 75% 40%,#123623 0%,var(--selva) 62%);color:#fff}
+.historia__grid{display:grid;grid-template-columns:1fr 1.1fr}
+.capitulo{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 4vw 0 6vw}
+.capitulo .etiqueta{color:var(--brote)}
+.capitulo h2{font-size:clamp(40px,5vw,78px);line-height:1;letter-spacing:-.04em;font-weight:800;margin:18px 0 22px;max-width:12ch}
+.capitulo h2 .acento{color:var(--brote)}
+.capitulo h2 .acento--estres{color:var(--oxido-claro)}
+.capitulo p{font-size:18px;line-height:1.6;color:rgba(255,255,255,.72);max-width:40ch;margin:0}
+.capitulo .dato{display:flex;gap:28px;margin-top:30px}
+.capitulo .dato div b{display:block;font-size:42px;font-weight:900;letter-spacing:-.03em}
+.capitulo .dato div span{font-size:13px;color:rgba(255,255,255,.6)}
+.capitulo>*{opacity:.15;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.capitulo.visible>*{opacity:1;transform:none}
+.escena{position:sticky;top:0;height:100vh}
+#particulas{width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
+#particulas:active{cursor:grabbing}
+.contador{position:sticky;top:calc(100vh - 54px);height:0;z-index:5;padding-left:6vw;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:rgba(255,255,255,.55)}
+.contador b{color:#fff;font-weight:500}
+.leyenda-escena{position:absolute;bottom:28px;right:4vw;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.5)}
+
+/* ---------- Secciones claras ---------- */
+.seccion{padding:120px 6vw}
+.seccion h2{font-size:clamp(34px,4vw,60px);line-height:1.02;letter-spacing:-.04em;font-weight:900;margin:16px 0 14px;color:var(--selva-2);max-width:18ch}
+.seccion>p.lead{font-size:18px;color:var(--tinta-2);margin:0 0 40px;max-width:52ch;line-height:1.55}
+
+/* Cinta interactiva */
+.conmutador{display:inline-flex;background:#fff;border:1px solid var(--linea);border-radius:999px;padding:4px;margin-bottom:22px}
+.conmutador button{border:0;background:none;padding:9px 18px;border-radius:999px;font-weight:700;color:var(--tinta-2)}
+.conmutador button.on{background:var(--selva-2);color:#fff}
+.cinta{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
+.mes{position:relative;text-align:center}
+.mes__col{height:220px;border-radius:10px;background:#fff;display:flex;align-items:flex-end;overflow:hidden;border:1px solid #E3E9E3}
+.mes__relleno{width:100%;height:0;background:rgba(179,65,42,.35);transition:height .9s cubic-bezier(.2,.8,.2,1),background .4s;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-weight:800;font-size:14px;color:var(--oxido)}
+.mes.critico .mes__relleno{background:var(--oxido);color:#fff}
+.mes__nombre{margin-top:10px;font-weight:700;font-size:14px;color:var(--tinta-2)}
+.mes.critico .mes__nombre{color:var(--oxido)}
+.globo{position:absolute;bottom:calc(100% - 30px);left:50%;transform:translate(-50%,8px);background:var(--selva-2);color:#fff;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:3;text-align:left}
+.mes:hover .globo,.mes:focus-within .globo{opacity:1;transform:translate(-50%,0)}
+.mes button{all:unset;position:absolute;inset:0;border-radius:10px}
+.resumen-cinta{display:flex;gap:40px;margin-top:34px;flex-wrap:wrap}
+.resumen-cinta div b{display:block;font-size:40px;font-weight:900;letter-spacing:-.03em;color:var(--oxido)}
+.resumen-cinta div span{color:var(--tinta-2);font-size:14px}
+
+/* Rotaciones */
+.pestanas{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.pestana{border:2px solid var(--linea);background:#fff;border-radius:14px;padding:14px 18px;text-align:left;min-width:200px;transition:border-color .2s,transform .2s}
+.pestana:hover{transform:translateY(-2px)}
+.pestana small{display:block;font-family:var(--mono);font-size:11px;color:var(--tinta-2)}
+.pestana b{font-size:18px}
+.pestana.on{border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 18%,transparent)}
+.rotacion{background:#fff;border-radius:22px;padding:34px;border:1px solid #E3E9E3}
+.rotacion__cabeza{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.rotacion__cabeza h3{font-size:30px;letter-spacing:-.03em;margin:0;font-weight:900}
+.rotacion__cabeza p{margin:6px 0 0;color:var(--tinta-2);font-size:16px}
+.medidor{min-width:240px}
+.medidor__num{font-size:56px;font-weight:900;letter-spacing:-.04em;line-height:1;color:var(--c)}
+.medidor__num small{font-size:18px;color:var(--tinta-2);font-weight:600}
+.medidor__barra{height:10px;background:#EEF1EE;border-radius:99px;overflow:hidden;margin-top:10px}
+.medidor__barra i{display:block;height:100%;width:0;background:var(--c);border-radius:99px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.medidor__estado{margin-top:8px;font-weight:800;color:var(--c)}
+.linea-tiempo{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:34px 0 10px}
+.lt{height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;position:relative;transform:scaleY(0);transform-origin:bottom;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.lt.desnudo{outline:3px solid var(--oxido);outline-offset:-3px}
+.lt.critico::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:5px;border-radius:3px;background:var(--oxido)}
+.lt-meses{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;font-size:12px;color:var(--tinta-2);text-align:center;margin-top:16px}
+.rotacion__datos{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:30px;border-top:1px solid #EEF1EE;padding-top:24px}
+.rotacion__datos small{display:block;font-family:var(--mono);font-size:11px;color:var(--tinta-2);margin-bottom:6px}
+.rotacion__datos p{margin:0;font-size:16px;line-height:1.5}
+.leyenda{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--tinta-2);margin-top:18px}
+.leyenda span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--c);margin-right:6px;vertical-align:-1px}
+.leyenda .contorno::before{background:transparent;outline:2px solid var(--oxido);outline-offset:-2px}
+
+/* Cifras */
+.cifras{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--linea)}
+.cifra{padding:30px 24px 10px 0}
+.cifra+.cifra{padding-left:24px;border-left:1px solid var(--linea)}
+.cifra b{display:block;font-size:clamp(44px,5vw,72px);font-weight:900;letter-spacing:-.045em;color:var(--selva-2);font-variant-numeric:tabular-nums;line-height:1}
+.cifra span{display:block;margin-top:10px;color:var(--tinta-2);font-size:15px;max-width:22ch}
+.fuentes{margin-top:26px;font-family:var(--mono);font-size:12px;color:var(--tinta-2);line-height:1.8}
+
+/* Cierre */
+.cierre{background:var(--selva);color:#fff;padding:130px 6vw 40px;position:relative;overflow:hidden}
+.cierre h2{font-size:clamp(42px,6vw,96px);line-height:.98;letter-spacing:-.05em;font-weight:900;margin:18px 0 26px;max-width:14ch}
+.cierre h2 .acento{color:var(--brote)}
+.cierre p{color:rgba(255,255,255,.7);font-size:18px;max-width:46ch;line-height:1.55}
+.cierre .etiqueta{color:var(--brote)}
+.pie{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:110px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);font-size:13px;color:rgba(255,255,255,.55)}
+.pie strong{color:#fff}
+
+.revelar{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.revelar.visible{opacity:1;transform:none}
+
+/* ---------- Celular ---------- */
+@media (max-width:900px){
+  .barra nav a:not(.app){display:none}
+  .portada{grid-template-columns:1fr;padding-top:100px}
+  .anillo{max-width:380px}
+  .historia__grid{grid-template-columns:1fr}
+  .escena{position:fixed;inset:0;height:100vh;opacity:.35;pointer-events:none;z-index:0;display:none}
+  .historia.activa .escena{display:block}
+  .capitulo{position:relative;z-index:1}
+  .leyenda-escena{display:none}
+  .cinta{gap:3px}.mes__col{height:150px}.mes__relleno{font-size:11px}.mes__nombre{font-size:11px}
+  .rotacion{padding:22px}.rotacion__datos{grid-template-columns:1fr}
+  .lt{height:44px;font-size:0}
+  .cifras{grid-template-columns:1fr 1fr}.cifra:nth-child(3){border-left:0;padding-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  .capitulo>*,.revelar{opacity:1;transform:none}
+}
+</style>
+</head>
+<body class="bloqueado">
+
+<!-- ===================== INTRO ===================== -->
+<div id="intro" aria-hidden="true">
+  <button class="saltar" id="saltar">Saltar intro</button>
+  <div class="carga" id="carga"><div class="carga__pct" id="pct">0%</div><div class="carga__barra" id="barraCarga"></div></div>
+  <div class="saludo" id="saludo"><span id="texto"></span><span class="cursor"></span></div>
+  <button class="desliza" id="desliza">DESLIZA PARA CONTINUAR ↓</button>
+</div>
+
+<!-- ===================== BARRA ===================== -->
+<header class="barra" id="barra">
+  <a class="marca" href="#inicio">
+    <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 3"/><path d="M12 27 C12 17 19 11 29 11 C29 21 23 28 13 28 Z" fill="#3B8F4F"/><path d="M13 27 L24 16" stroke="#E7F3E9" stroke-width="1.6" stroke-linecap="round"/><circle cx="34" cy="12" r="3" fill="#D9A441"/></svg>
+    <span><b>ChakraSat</b><small>NASA SPACE APPS 2026</small></span>
+  </a>
+  <nav>
+    <a href="#historia">Historia</a>
+    <a href="#cinta">El año</a>
+    <a href="#rotaciones">Rotaciones</a>
+    <a href="#datos">Datos</a>
+    <a class="app" id="enlaceApp" href="#">Abrir la app</a>
+  </nav>
+</header>
+
+<!-- ===================== PORTADA ===================== -->
+<section class="portada" id="inicio">
+  <div>
+    <div class="etiqueta">Pastaza, Amazonía ecuatoriana</div>
+    <h1>¿Qué sembrar para que el suelo no quede <em>desnudo</em> en los meses secos?</h1>
+    <p>ChakraSat cruza 11 años de datos (abr 2015 – oct 2026) de la NASA con lo que el técnico sabe del suelo y compara rotaciones para cada chakra.</p>
+    <div class="botones">
+      <a class="btn btn--oscuro" href="#historia">Ver la historia ↓</a>
+      <a class="btn btn--linea" id="enlaceApp2" href="#">Abrir la app</a>
+    </div>
+    <div class="meta"><span>NASA POWER</span><span>MODIS 250 m</span><span>Reto Field Shift</span></div>
+  </div>
+  <div class="anillo" id="anillo" role="img" aria-label="Anillo del año: porcentaje de años con estrés en cada mes">
+    <svg viewBox="-260 -260 520 520" id="anilloSvg"></svg>
+    <div class="anillo__centro"><div><b id="anilloValor">Sep–Oct</b><span id="anilloTexto">meses críticos de la chakra</span></div></div>
+    <div class="anillo__ayuda">Arrastra para girar · pasa el cursor por un mes</div>
+  </div>
+</section>
+
+<!-- ===================== HISTORIA (capítulos con partículas) ===================== -->
+<section class="historia" id="historia">
+  <div class="contador" id="contador">CAPÍTULO <b id="capNum">01</b> / 04</div>
+  <div class="historia__grid">
+    <div>
+      <article class="capitulo" data-forma="planeta">
+        <div class="etiqueta">Desde el espacio</div>
+        <h2>Cada día, la NASA <span class="acento">mide la Tierra.</span></h2>
+        <p>Lluvia, humedad del suelo y verdor de la vegetación, en cualquier punto del planeta. Datos públicos y gratuitos.</p>
+      </article>
+      <article class="capitulo" data-forma="barras">
+        <div class="etiqueta">El año de la chakra</div>
+        <h2>Llueve mucho, pero <span class="acento acento--estres">no todo el año.</span></h2>
+        <p>En Pastaza caen casi 3.000 mm al año. Aun así, septiembre y octubre se secan casi siempre.</p>
+        <div class="dato"><div><b>139 mm</b><span>lluvia de septiembre</span></div><div><b>−6%</b><span>humedad del suelo</span></div></div>
+      </article>
+      <article class="capitulo" data-forma="contraste">
+        <div class="etiqueta">El hallazgo</div>
+        <h2>El bosque aguanta. <span class="acento acento--estres">La chakra desnuda, no.</span></h2>
+        <p>En los meses secos el satélite MODIS ve el bosque igual de verde. El suelo descubierto pierde humedad.</p>
+        <div class="dato"><div><b>+5%</b><span>NDVI del bosque</span></div><div><b>−6%</b><span>humedad del suelo</span></div></div>
+      </article>
+      <article class="capitulo" data-forma="cubierta">
+        <div class="etiqueta">La respuesta</div>
+        <h2>Cubrir el suelo <span class="acento">justo a tiempo.</span></h2>
+        <p>Una leguminosa después del maíz protege la chakra en los meses críticos y le devuelve nitrógeno.</p>
+      </article>
+    </div>
+    <div class="escena">
+      <canvas id="particulas" aria-label="Animación de partículas que acompaña la historia"></canvas>
+      <div class="leyenda-escena">Arrastra para girar</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CINTA DEL AÑO ===================== -->
+<section class="seccion" id="cinta">
+  <div class="etiqueta revelar">Ventana de estrés</div>
+  <h2 class="revelar">Los meses en que el suelo sufre.</h2>
+  <p class="lead revelar">Porcentaje de años en que la humedad cayó bajo lo normal. Pasa el cursor por cada mes.</p>
+  <div class="conmutador revelar" role="group" aria-label="Escenario">
+    <button class="on" data-escenario="normal">Año típico</button>
+    <button data-escenario="seco">Año seco</button>
+  </div>
+  <div class="cinta revelar" id="cintaMeses"></div>
+  <div class="resumen-cinta revelar">
+    <div><b id="resMeses">Sep–Oct</b><span>meses críticos</span></div>
+    <div><b id="resPct">71%</b><span id="resPctTexto">de los años con estrés</span></div>
+  </div>
+</section>
+
+<!-- ===================== ROTACIONES ===================== -->
+<section class="seccion" id="rotaciones" style="padding-top:40px">
+  <div class="etiqueta revelar">Tres caminos</div>
+  <h2 class="revelar">¿Qué rotación cubre los meses rojos?</h2>
+  <p class="lead revelar">Misma chakra, mismo clima. Elige una opción.</p>
+  <div class="pestanas revelar" id="pestanas" role="tablist"></div>
+  <div class="rotacion revelar" id="rotacion" role="tabpanel"></div>
+  <div class="leyenda revelar">
+    <span style="--c:#B9D7B0">Siembra</span><span style="--c:#3B8F4F">Crecimiento</span><span style="--c:#D9A441">Cosecha</span>
+    <span style="--c:#E4DACD">Descanso</span><span style="--c:#B3412A">Mes crítico</span><span class="contorno">Suelo desnudo</span>
+  </div>
+</section>
+
+<!-- ===================== DATOS ===================== -->
+<section class="seccion" id="datos" style="padding-top:40px">
+  <div class="etiqueta revelar">Datos reales</div>
+  <h2 class="revelar">Nada inventado.</h2>
+  <div class="cifras revelar">
+    <div class="cifra"><b data-contar="139">0</b><span>meses de lluvia y humedad (NASA POWER)</span></div>
+    <div class="cifra"><b data-contar="114">0</b><span>meses de NDVI satelital (MODIS, filtrado de nubes)</span></div>
+    <div class="cifra"><b data-contar="250" data-sufijo=" m">0</b><span>resolución de MODIS: casi una chakra</span></div>
+    <div class="cifra"><b data-contar="71" data-sufijo="%">0</b><span>de los años con estrés en septiembre y octubre</span></div>
+  </div>
+  <div class="fuentes revelar">NASA POWER · PRECTOTCORR, GWETTOP (MERRA-2) — MODIS MOD13Q1 vía ORNL DAAC — abril 2015 a octubre 2026</div>
+</section>
+
+<!-- ===================== CIERRE ===================== -->
+<section class="cierre" id="app">
+  <div class="etiqueta">Para técnicos y familias agricultoras</div>
+  <h2>Datos del espacio, <span class="acento">decisiones en la chakra.</span></h2>
+  <p>Dibuja cualquier parcela del mundo, registra el suelo y lleva un informe para conversar con la familia.</p>
+  <div class="botones" style="margin-top:30px">
+    <a class="btn btn--claro" id="enlaceApp3" href="#">Abrir ChakraSat</a>
+    <a class="btn" style="border-color:rgba(255,255,255,.25);color:#fff" href="#inicio">Volver arriba ↑</a>
+  </div>
+  <div class="pie">
+    <div><strong>Apoya, no reemplaza, el juicio del agricultor.</strong> Validar en campo.</div>
+    <div>NASA Space Apps Challenge 2026 · Field Shift: Adapting Farms with NASA Data</div>
+  </div>
+</section>
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN — cambia aquí la dirección de la app de Streamlit
+   ===================================================================== */
+const APP_URL = "http://localhost:8501";
+
+/* Datos reales de la chakra demo de Pastaza (NASA POWER + MODIS), año agrícola Abr–Mar */
+const DATOS = {
+  meses: ["Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar"],
+  largos: ["abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre","enero","febrero","marzo"],
+  frecuencia: [0,0,0,.08,.33,.75,.67,.36,.09,.27,.27,.09],
+  secos: [0,0,0,.33,1,1,1,1,.33,0,.33,.33],
+  humedad: [3.1,3.8,3.7,1.8,-1,-5.9,-6.6,-2.6,-.5,.7,1.1,2.3],
+  ndvi: [-12.4,1.3,-.2,4.5,3.3,2.8,7.6,3.2,-1.3,4.7,-7.5,-8.3],
+  lluvia: [316,310,318,210,186,139,249,237,248,225,238,275],
+  ventana: [5,6],                 // Sep, Oct (índices en el año agrícola)
+  ventanaSeca: [4,5,6,7],         // Ago–Nov en años secos (2019, 2020, 2024)
+};
+const FASES = {siembra:["#B9D7B0","#1B2E24"], crecimiento:["#3B8F4F","#fff"], cosecha:["#D9A441","#1B2E24"], barbecho:["#E4DACD","#6B5A49"]};
+const ROT = {
+  A:{nombre:"Rotación actual",sec:"Maíz → Descanso → Yuca → Descanso",puntaje:30,color:"#B3412A",estado:"Mejorable",
+     porque:"Es lo que se siembra hoy: punto de comparación.",beneficio:"Manejo conocido, sin costos nuevos.",riesgo:"Suelo desnudo en meses secos: pierde humedad y materia orgánica.",
+     c:[["Maíz","siembra",0],["Maíz","crecimiento",1],["Maíz","crecimiento",1],["Maíz","crecimiento",1],["Maíz","cosecha",1],["Descanso","barbecho",0],["Descanso","barbecho",0],["Yuca","siembra",0],["Yuca","crecimiento",1],["Yuca","crecimiento",1],["Yuca","crecimiento",1],["Yuca","crecimiento",1]]},
+  B:{nombre:"Con leguminosa",sec:"Maíz → Maní forrajero (perenne) → Yuca + maní",puntaje:95,color:"#3B8F4F",estado:"Recomendable",
+     porque:"Una leguminosa perenne cubre el suelo todo el tiempo.",beneficio:"Fija nitrógeno y protege el suelo en los dos años.",riesgo:"Requiere semilla o esquejes en la zona.",
+     c:[["Maíz","siembra",0],["Maíz","crecimiento",1],["Maíz","crecimiento",1],["Maíz + maní","crecimiento",1],["Maíz","cosecha",1],["Maní","crecimiento",1],["Maní","crecimiento",1],["Yuca + maní","siembra",1],["Yuca + maní","crecimiento",1],["Yuca + maní","crecimiento",1],["Yuca + maní","crecimiento",1],["Yuca + maní","crecimiento",1]]},
+  C:{nombre:"Con cobertura",sec:"Maíz → Mucuna → Yuca → Mucuna",puntaje:85,color:"#3B8F4F",estado:"Recomendable",
+     porque:"La mucuna cubre rápido y deja mulch para la yuca.",beneficio:"Mucha materia orgánica y nitrógeno.",riesgo:"Es trepadora: hay que cortarla a tiempo.",
+     c:[["Maíz","siembra",0],["Maíz","crecimiento",1],["Maíz","crecimiento",1],["Maíz + mucuna","crecimiento",1],["Maíz","cosecha",1],["Mucuna","crecimiento",1],["Mucuna","crecimiento",1],["Yuca","siembra",1],["Yuca","crecimiento",1],["Yuca","crecimiento",1],["Yuca","crecimiento",1],["Yuca","crecimiento",1]]},
+};
+const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = s => document.querySelector(s);
+// Dentro de la app (iframe): los botones abren el paso 1 de la propia app.
+function botonApp(){ try { return [...window.parent.document.querySelectorAll("button")].find(b => b.innerText.trim().startsWith("Empezar")); } catch(_) { return null; } }
+["#enlaceApp","#enlaceApp2","#enlaceApp3"].forEach(id => {
+  $(id).href = APP_URL; $(id).target = "_blank"; $(id).rel = "noopener";
+  $(id).addEventListener("click", e => { const b = window.parent !== window && botonApp(); if (b) { e.preventDefault(); b.click(); } });
+});
+
+/* =====================================================================
+   1. INTRO: carga + saludo que se escribe solo
+   ===================================================================== */
+(function intro(){
+  const barra = $("#barraCarga"); for (let i=0;i<34;i++) barra.appendChild(document.createElement("i"));
+  const celdas = barra.children; let p = 0;
+  const cerrar = () => { $("#intro").classList.add("fuera"); document.body.classList.remove("bloqueado"); };
+  $("#saltar").onclick = cerrar; $("#desliza").onclick = cerrar;
+  addEventListener("wheel", e => { if (e.deltaY > 0 && $("#desliza").style.opacity === "1") cerrar(); }, {passive:true});
+  addEventListener("touchmove", () => { if ($("#desliza").style.opacity === "1") cerrar(); }, {passive:true});
+  addEventListener("keydown", e => { if (["ArrowDown","PageDown"," ","Enter","Escape"].includes(e.key)) cerrar(); });
+  if (sinMovimiento) return cerrar();
+  const t = setInterval(() => {
+    p = Math.min(100, p + 3 + Math.random()*6);
+    $("#pct").textContent = Math.round(p) + "%";
+    for (let i=0;i<celdas.length;i++) celdas[i].classList.toggle("on", i/celdas.length < p/100);
+    if (p >= 100) { clearInterval(t); setTimeout(escribir, 250); }
+  }, 45);
+  function escribir(){
+    $("#carga").style.opacity = 0; $("#saludo").style.opacity = 1;
+    const frase = "Hola, chakra."; let i = 0;
+    const e = setInterval(() => { $("#texto").textContent = frase.slice(0, ++i); if (i >= frase.length) { clearInterval(e); $("#desliza").style.opacity = 1; } }, 85);
+  }
+})();
+
+/* =====================================================================
+   2. ANILLO DEL AÑO (portada) — se gira arrastrando
+   ===================================================================== */
+(function anillo(){
+  const svg = $("#anilloSvg"), NS = "http://www.w3.org/2000/svg";
+  const r1 = 150, r2 = 240, hueco = 2.2;
+  const grupo = document.createElementNS(NS, "g"); svg.appendChild(grupo);
+  const arco = (a0, a1, ri, re) => {
+    const p = (a, r) => [Math.cos(a)*r, Math.sin(a)*r];
+    const [x0,y0]=p(a0,re),[x1,y1]=p(a1,re),[x2,y2]=p(a1,ri),[x3,y3]=p(a0,ri);
+    return `M${x0},${y0} A${re},${re} 0 0 1 ${x1},${y1} L${x2},${y2} A${ri},${ri} 0 0 0 ${x3},${y3} Z`;
+  };
+  DATOS.meses.forEach((m, i) => {
+    const a0 = (i/12)*Math.PI*2 - Math.PI/2 + hueco*Math.PI/180, a1 = ((i+1)/12)*Math.PI*2 - Math.PI/2 - hueco*Math.PI/180;
+    const critico = DATOS.ventana.includes(i), f = DATOS.frecuencia[i];
+    const alto = r1 + 20 + (r2 - r1 - 20) * Math.max(.15, f);
+    const g = document.createElementNS(NS, "g"); g.classList.add("seg");
+    const base = document.createElementNS(NS, "path"); base.setAttribute("d", arco(a0,a1,r1,r2)); base.setAttribute("fill", "#E3E9E3"); g.appendChild(base);
+    const val = document.createElementNS(NS, "path"); val.setAttribute("d", arco(a0,a1,r1,alto));
+    val.setAttribute("fill", critico ? "#B3412A" : `rgba(179,65,42,${.12+.5*f})`); g.appendChild(val);
+    const am = (a0+a1)/2, t = document.createElementNS(NS, "text");
+    t.setAttribute("x", Math.cos(am)*(r2+18)); t.setAttribute("y", Math.sin(am)*(r2+18)+4);
+    t.setAttribute("text-anchor","middle"); t.setAttribute("font-size","13"); t.setAttribute("font-weight", critico ? "800" : "600");
+    t.setAttribute("fill", critico ? "#B3412A" : "#55665C"); t.textContent = m; t.dataset.mes = i; g.appendChild(t);
+    g.style.opacity = critico ? 1 : .85;
+    g.addEventListener("pointerenter", () => {
+      $("#anilloValor").textContent = Math.round(f*100) + "%";
+      $("#anilloTexto").textContent = `de los años con estrés en ${DATOS.largos[i]} · humedad ${DATOS.humedad[i] > 0 ? "+" : ""}${DATOS.humedad[i]}%`;
+    });
+    g.addEventListener("pointerleave", () => { $("#anilloValor").textContent = "Sep–Oct"; $("#anilloTexto").textContent = "meses críticos de la chakra"; });
+    grupo.appendChild(g);
+  });
+  // Giro: automático suave + arrastre con el mouse o el dedo
+  let angulo = -40, vel = sinMovimiento ? 0 : .04, arrastrando = false, x0 = 0;
+  const el = $("#anillo");
+  el.addEventListener("pointerdown", e => { arrastrando = true; x0 = e.clientX; el.setPointerCapture(e.pointerId); });
+  el.addEventListener("pointermove", e => { if (!arrastrando) return; angulo += (e.clientX - x0) * .5; x0 = e.clientX; });
+  el.addEventListener("pointerup", () => arrastrando = false);
+  (function girar(){
+    if (!arrastrando) angulo += vel;
+    grupo.setAttribute("transform", `rotate(${angulo})`);
+    grupo.querySelectorAll("text").forEach(t => t.setAttribute("transform", `rotate(${-angulo} ${t.getAttribute("x")} ${t.getAttribute("y")})`));
+    requestAnimationFrame(girar);
+  })();
+})();
+
+/* =====================================================================
+   3. PARTÍCULAS 3D que cambian de forma con cada capítulo
+   ===================================================================== */
+(function particulas(){
+  const canvas = $("#particulas"), ctx = canvas.getContext("2d");
+  const N = innerWidth < 900 ? 1100 : 2200;
+  const COL = {hoja:[123,216,143], rio:[111,179,220], oxido:[224,102,76], ocre:[217,164,65], blanco:[220,235,225], bosque:[59,143,79]};
+  const al = Math.random;
+  const formas = {
+    planeta(i){ // esfera de puntos (Fibonacci) + órbita del satélite
+      if (i > N*.92) { const a = (i/N)*Math.PI*40; return [Math.cos(a)*1.55, Math.sin(a)*.25, Math.sin(a)*1.55, "ocre"]; }
+      const k = i + .5, phi = Math.acos(1 - 2*k/(N*.92)), th = Math.PI*(1+Math.sqrt(5))*k;
+      const x = Math.cos(th)*Math.sin(phi), y = Math.cos(phi), z = Math.sin(th)*Math.sin(phi);
+      return [x*1.1, y*1.1, z*1.1, (Math.sin(x*4)+Math.cos(z*3+y*2)) > .4 ? "hoja" : "rio"];
+    },
+    barras(i){ // 12 barras: lluvia de cada mes (rojo = meses críticos)
+      const m = i % 12, alto = DATOS.lluvia[m]/318*1.6;
+      const x = -1.65 + m*.3 + (al()-.5)*.17, z = (al()-.5)*.35, y = -.85 + al()*alto;
+      return [x, y, z, DATOS.ventana.includes(m) ? "oxido" : "rio"];
+    },
+    contraste(i){ // izquierda: bosque (conos verdes) · derecha: suelo desnudo
+      if (i < N*.62) {
+        const arbol = i % 14, cx = -1.55 + (arbol % 4)*.36 + (arbol > 7 ? .18 : 0), cz = -.5 + Math.floor(arbol/4)*.32;
+        const h = al(), rad = (1-h)*.2;
+        const a = al()*Math.PI*2;
+        return [cx + Math.cos(a)*rad, -.8 + h*1.2, cz + Math.sin(a)*rad, "hoja"];
+      }
+      return [.25 + al()*1.5, -.8 + al()*.06, -.7 + al()*1.4, al() < .7 ? "oxido" : "ocre"];
+    },
+    cubierta(i){ // toda la chakra cubierta: suelo con plantas bajas
+      if (i < N*.3) return [-1.6 + al()*3.2, -.82, -.7 + al()*1.4, "ocre"];
+      const p = i % 60, cx = -1.5 + (p % 10)*.33, cz = -.6 + Math.floor(p/10)*.24;
+      const a = al()*Math.PI*2, r = al()*.15, h = al()*.35;
+      return [cx + Math.cos(a)*r, -.8 + h*(1 - r*3), cz + Math.sin(a)*r, al() < .8 ? "hoja" : "brote"];
+    },
+  };
+  COL.brote = [180,240,190];
+  let rotY = .4, rotX = -.18, velY = sinMovimiento ? 0 : .0025, arr = false, px = 0, py = 0;
+  const P = Array.from({length:N}, (_, i) => { const [x,y,z,c] = formas.planeta(i); return {x,y,z,tx:x,ty:y,tz:z,c,tc:c, s:.6+al()*1.2}; });
+  // Cada forma tiene su ángulo de vista y su velocidad de giro (las barras se leen mejor de frente)
+  const VISTA = {planeta:[null,.0025], barras:[.18,0], contraste:[.5,.0006], cubierta:[.6,.0008]};
+  let objetivoY = null;
+  function cambiar(nombre){
+    P.forEach((p,i) => { const [x,y,z,c] = formas[nombre](i); p.tx=x; p.ty=y; p.tz=z; p.tc=c; });
+    const [ang, v] = VISTA[nombre];
+    if (ang !== null) objetivoY = Math.round((rotY - ang)/(2*Math.PI))*2*Math.PI + ang; else objetivoY = null;
+    velY = sinMovimiento ? 0 : v;
+  }
+
+  let ancho, alto, dpr;
+  function medir(){ dpr = Math.min(2, devicePixelRatio||1); ancho = canvas.clientWidth; alto = canvas.clientHeight; canvas.width = ancho*dpr; canvas.height = alto*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  addEventListener("resize", medir); medir();
+
+  canvas.addEventListener("pointerdown", e => { arr = true; objetivoY = null; px = e.clientX; py = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if (!arr) return; rotY += (e.clientX-px)*.008; rotX = Math.max(-1, Math.min(1, rotX + (e.clientY-py)*.005)); px = e.clientX; py = e.clientY; });
+  canvas.addEventListener("pointerup", () => arr = false);
+
+  let visible = true;
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; $("#historia").classList.toggle("activa", visible); if (visible) medir(); }).observe($("#historia"));
+  function cuadro(){
+    requestAnimationFrame(cuadro);
+    if (!visible) return;
+    if (!arr) { if (objetivoY !== null) { rotY += (objetivoY-rotY)*.05; if (Math.abs(objetivoY-rotY) < .002) objetivoY = null; } else rotY += velY; }
+    ctx.clearRect(0,0,ancho,alto);
+    const cy = Math.cos(rotY), sy = Math.sin(rotY), cx = Math.cos(rotX), sx = Math.sin(rotX);
+    const esc = Math.min(ancho, alto) * .34;
+    for (const p of P) {
+      p.x += (p.tx-p.x)*.06; p.y += (p.ty-p.y)*.06; p.z += (p.tz-p.z)*.06; if (Math.abs(p.tx-p.x) < .05) p.c = p.tc;
+      let x = p.x*cy - p.z*sy, z = p.x*sy + p.z*cy, y = p.y*cx - z*sx; z = p.y*sx + z*cx;
+      const f = 3.2/(z+4), X = ancho/2 + x*esc*f, Y = alto/2 - y*esc*f;
+      const [r,g,b] = COL[p.c] || COL.blanco, a = Math.max(.15, Math.min(1, .95 - z*.25));
+      ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+      const t = p.s*f*2.1; ctx.fillRect(X - t/2, Y - t/2, t, t);
+    }
+  }
+  cuadro();
+
+  // Cada capítulo que entra en pantalla cambia la forma
+  const caps = [...document.querySelectorAll(".capitulo")];
+  const obs = new IntersectionObserver(entradas => entradas.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("visible");
+    cambiar(e.target.dataset.forma);
+    $("#capNum").textContent = String(caps.indexOf(e.target)+1).padStart(2,"0");
+  }), {threshold:.55});
+  caps.forEach(c => obs.observe(c));
+})();
+
+/* =====================================================================
+   4. CINTA DEL AÑO con escenario normal / seco
+   ===================================================================== */
+(function cinta(){
+  const cont = $("#cintaMeses");
+  DATOS.meses.forEach((m, i) => {
+    const d = document.createElement("div"); d.className = "mes";
+    d.innerHTML = `<div class="globo"><b>${DATOS.largos[i][0].toUpperCase()+DATOS.largos[i].slice(1)}</b><br>
+      Lluvia: ${DATOS.lluvia[i]} mm<br>Humedad: ${DATOS.humedad[i] > 0 ? "+" : ""}${DATOS.humedad[i]}%<br>NDVI: ${DATOS.ndvi[i] > 0 ? "+" : ""}${DATOS.ndvi[i]}%</div>
+      <div class="mes__col"><div class="mes__relleno"></div></div><div class="mes__nombre">${m}</div>
+      <button aria-label="${DATOS.largos[i]}"></button>`;
+    cont.appendChild(d);
+  });
+  function pintar(esc){
+    const f = esc === "seco" ? DATOS.secos : DATOS.frecuencia, rojos = esc === "seco" ? DATOS.ventanaSeca : DATOS.ventana;
+    [...cont.children].forEach((d, i) => {
+      d.classList.toggle("critico", rojos.includes(i));
+      const r = d.querySelector(".mes__relleno"); r.style.height = Math.max(4, f[i]*100) + "%"; r.textContent = f[i] >= .1 ? Math.round(f[i]*100) + "%" : "";
+    });
+    $("#resMeses").textContent = esc === "seco" ? "Ago–Nov" : "Sep–Oct";
+    $("#resPct").textContent = esc === "seco" ? "100%" : "71%";
+    $("#resPctTexto").textContent = esc === "seco" ? "de los años secos con estrés" : "de los años con estrés";
+  }
+  document.querySelectorAll("[data-escenario]").forEach(b => b.onclick = () => {
+    document.querySelectorAll("[data-escenario]").forEach(x => x.classList.toggle("on", x === b)); pintar(b.dataset.escenario);
+  });
+  new IntersectionObserver(([e], o) => { if (e.isIntersecting) { pintar("normal"); o.disconnect(); } }, {threshold:.3}).observe(cont);
+})();
+
+/* =====================================================================
+   5. ROTACIONES en pestañas
+   ===================================================================== */
+(function rotaciones(){
+  const pest = $("#pestanas");
+  Object.entries(ROT).forEach(([k, r]) => {
+    const b = document.createElement("button"); b.className = "pestana"; b.style.setProperty("--c", r.color); b.setAttribute("role","tab");
+    b.innerHTML = `<small>OPCIÓN ${k}</small><b>${r.nombre}</b>`; b.onclick = () => mostrar(k); b.dataset.k = k; pest.appendChild(b);
+  });
+  function mostrar(k){
+    const r = ROT[k], cubiertos = DATOS.ventana.filter(i => r.c[i][2]).length;
+    pest.querySelectorAll(".pestana").forEach(b => { b.classList.toggle("on", b.dataset.k === k); b.setAttribute("aria-selected", b.dataset.k === k); });
+    let anterior = "";
+    const celdas = r.c.map(([cul, fase, cubre], i) => {
+      const [fondo, texto] = FASES[fase], critico = DATOS.ventana.includes(i), etiqueta = cul !== anterior ? cul : ""; anterior = cul;
+      return `<div class="lt${critico ? " critico" : ""}${critico && !cubre ? " desnudo" : ""}" style="background:${fondo};color:${texto};transition-delay:${i*40}ms" title="${DATOS.largos[i]}: ${cul}">${etiqueta}</div>`;
+    }).join("");
+    $("#rotacion").style.setProperty("--c", r.color);
+    $("#rotacion").innerHTML = `
+      <div class="rotacion__cabeza"><div><h3>${r.nombre}</h3><p>${r.sec}</p></div>
+        <div class="medidor"><div class="medidor__num"><span id="num">0</span><small> / 100</small></div>
+          <div class="medidor__barra"><i id="barraRot"></i></div><div class="medidor__estado">${r.estado} · suelo cubierto ${cubiertos}/2 meses críticos</div></div></div>
+      <div class="linea-tiempo">${celdas}</div>
+      <div class="lt-meses">${DATOS.meses.map(m => `<span>${m}</span>`).join("")}</div>
+      <div class="rotacion__datos"><div><small>POR QUÉ</small><p>${r.porque}</p></div><div><small>BENEFICIO</small><p>${r.beneficio}</p></div><div><small>RIESGO</small><p>${r.riesgo}</p></div></div>`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.querySelectorAll(".lt").forEach(e => e.style.transform = "scaleY(1)");
+      $("#barraRot").style.width = r.puntaje + "%";
+      contar($("#num"), r.puntaje, "", 700);
+    }));
+  }
+  mostrar("A");
+})();
+
+/* =====================================================================
+   6. Revelado al hacer scroll, contadores y barra superior
+   ===================================================================== */
+function contar(el, fin, sufijo = "", dur = 1400){
+  if (sinMovimiento) { el.textContent = fin + sufijo; return; }
+  const t0 = performance.now();
+  (function paso(t){ const k = Math.min(1, (t-t0)/dur), v = Math.round(fin*(1-Math.pow(1-k,3))); el.textContent = v + sufijo; if (k < 1) requestAnimationFrame(paso); })(t0);
+}
+const obsRevelar = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add("visible");
+  e.target.querySelectorAll?.("[data-contar]").forEach(n => contar(n, +n.dataset.contar, n.dataset.sufijo || ""));
+  obsRevelar.unobserve(e.target);
+}), {threshold:.2});
+document.querySelectorAll(".revelar").forEach(el => obsRevelar.observe(el));
+
+const barra = $("#barra");
+function actualizarBarra(){
+  barra.classList.toggle("solida", scrollY > 30);
+  const h = $("#historia").getBoundingClientRect(), c = $("#app").getBoundingClientRect();
+  barra.classList.toggle("oscura", (h.top < 60 && h.bottom > 60) || c.top < 60);
+}
+addEventListener("scroll", actualizarBarra, {passive:true}); actualizarBarra();
+</script>
+</body>
+</html>

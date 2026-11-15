@@ -1,0 +1,14 @@
+{
+  "ndvi": "MODIS MOD13A2 (datos de ejemplo)",
+  "real": true,
+  "descargado": "2026-11-14",
+  "punto": {
+    "lat": -1.5294,
+    "lon": -77.9359,
+    "elevacion_m": 1815.17
+  },
+  "humedad": "NASA POWER GWETTOP (modelo MERRA-2)",
+  "humedad_unidad": "fracción 0–1",
+  "lluvia": "NASA POWER PRECTOTCORR",
+  "url_power": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR,GWETTOP,GWETROOT&community=AG&latitude=-1.5294&longitude=-77.9359&start=20150401&end=20261113&format=JSON"
+}

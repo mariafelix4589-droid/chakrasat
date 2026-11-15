@@ -1,0 +1,17 @@
+{
+  "real": true,
+  "humedad": "NASA POWER GWETTOP (modelo MERRA-2)",
+  "humedad_unidad": "fracción 0–1",
+  "ndvi": "MODIS MOD13Q1 NDVI 250 m (ORNL DAAC)",
+  "lluvia": "NASA POWER PRECTOTCORR",
+  "nota": "Humedad del modelo MERRA-2 de la NASA (no del satélite SMAP). NDVI de MODIS con filtro de nubes.",
+  "descargado": "2026-11-14",
+  "punto": {
+    "lat": -1.5309,
+    "lon": -77.9304,
+    "elevacion_m": 1815.17
+  },
+  "url_power": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR,GWETTOP,GWETROOT&community=AG&latitude=-1.5309&longitude=-77.9304&start=20150401&end=20261113&format=JSON",
+  "ndvi_descargado": "2026-11-14",
+  "ndvi_meses": 114
+}
