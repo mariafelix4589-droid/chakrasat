@@ -43,7 +43,7 @@ def _cinta_estres(estres):
         fondo = "#B3412A" if rojo else f"rgba(179,65,42,{0.05 + 0.45 * float(pm.loc[m, 'frecuencia']):.2f})"
         color = "#fff" if rojo else "#56675D"
         celdas.append(f'<div><div style="background:{fondo};color:{color}">{pm.loc[m, "frecuencia"]:.0%}</div>{MESES[m - 1]}</div>')
-    return f'<div class="cinta" style="grid-template-columns:repeat({len(cal)},1fr);font-size:9px">{"".join(celdas)}</div>'
+    return f'<div class="cinta">{"".join(celdas)}</div>'
 
 
 def _cinta_rotacion(cal):
