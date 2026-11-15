@@ -8,7 +8,7 @@ Puntaje de 0 a 100, sumando y restando cosas que se pueden explicar en voz alta:
   − riesgo de manejo
   − repetir lo mismo cuando el maíz ya se siembra todos los años
 """
-from config import SEMAFORO
+from config import SEMAFORO, SUELOS
 from utils.calendario import meses_desnudos_texto
 
 
@@ -17,11 +17,11 @@ def evaluar_perfil(perfil):
     observaciones, brechas = [], []
     suelo_pobre = False
 
-    if perfil["tipo_suelo"] == "Arenoso":
-        suelo_pobre = True
-        observaciones.append("Arenoso: retiene poca agua. La cobertura ayuda mucho.")
-    elif perfil["tipo_suelo"] == "Arcilloso":
-        observaciones.append("Arcilloso: retiene agua, pero se compacta.")
+    suelo = SUELOS.get(perfil["tipo_suelo"], SUELOS["Franco"])
+    suelo_pobre = suelo["pobre"]
+    observaciones.append(f"{perfil['tipo_suelo']}: {suelo['nota']}")
+    if suelo.get("brecha"):
+        brechas.append(suelo["brecha"])
 
     if perfil["tiene_analisis"]:
         if perfil["materia_organica"] < 3:
@@ -61,10 +61,10 @@ def calcular_semaforo(rotacion, calendario, perfil):
     if lectura["suelo_pobre"] and (rotacion["leguminosa"] or rotacion["alta_biomasa"]):
         puntaje += p["bono_suelo_pobre"]
         razones.append(f"Suelo pobre: la cobertura vale más (+{p['bono_suelo_pobre']})")
-    if cobertura < 1 and perfil["tipo_suelo"] in ("Arcilloso", "Arenoso"):
+    efecto = SUELOS.get(perfil["tipo_suelo"], {}).get("desnudo")
+    if cobertura < 1 and efecto:
         puntaje -= p["castigo_suelo_desnudo"]
-        efecto = "se compacta" if perfil["tipo_suelo"] == "Arcilloso" else "se lava"
-        razones.append(f"Suelo {perfil['tipo_suelo'].lower()} desnudo {efecto} (−{p['castigo_suelo_desnudo']})")
+        razones.append(f"{perfil['tipo_suelo']} sin cobertura: {efecto} (−{p['castigo_suelo_desnudo']})")
     castigo = p["castigo_riesgo"][rotacion["riesgo_manejo"]]
     if castigo:
         puntaje -= castigo

@@ -5,6 +5,9 @@ Pantalla 1 — Selección de parcela.
 """
 import folium
 import streamlit as st
+import re
+
+import requests
 from folium.plugins import Draw
 from streamlit_folium import st_folium
 
@@ -46,6 +49,25 @@ def _mapa(todas, actual):
     return mapa
 
 
+def _buscar(texto):
+    """'-1.49, -78.00' o un nombre de lugar → (lat, lon, nombre) o None."""
+    numeros = re.findall(r"-?\d+(?:[.,]\d+)?", texto)
+    if len(numeros) == 2 and not re.search(r"[a-zA-Z]{3,}", texto):
+        lat, lon = (float(n.replace(",", ".")) for n in numeros)
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            return lat, lon, f"{lat:.4f}, {lon:.4f}"
+    try:
+        r = requests.get("https://nominatim.openstreetmap.org/search",
+                         params={"q": texto, "format": "json", "limit": 1, "accept-language": "es"},
+                         headers={"User-Agent": "ChakraSat/1.0 (NASA Space Apps 2026)"}, timeout=10)
+        datos = r.json()
+    except Exception:
+        return None
+    if not datos:
+        return None
+    return float(datos[0]["lat"]), float(datos[0]["lon"]), datos[0]["display_name"].split(",")[0]
+
+
 def mostrar():
     titulo("Elige la parcela", "Usa una chakra demo o dibuja la tuya en cualquier lugar del mundo.")
 
@@ -60,7 +82,21 @@ def mostrar():
             st.session_state.parcela = elegida
             st.rerun()
 
-        html('<div class="fuente">Dibuja tu zona con <b>⬟ polígono</b>, <b>▭ rectángulo</b> o <b>📍 punto</b> '
+        with st.form("buscar_lugar", border=False):
+            c_txt, c_btn = st.columns([4, 1], vertical_alignment="bottom")
+            texto = c_txt.text_input("Buscar ubicación", placeholder="Ej.: Puyo, Tena, Arajuno… o -1.49, -78.00")
+            buscar = c_btn.form_submit_button("Buscar", type="primary", width="stretch")
+        if buscar and texto.strip():
+            with st.spinner("Buscando…"):
+                hallado = _buscar(texto.strip())
+            if hallado:
+                lat_b, lon_b, nombre_b = hallado
+                agregar_zona({"type": "Point", "coordinates": [lon_b, lat_b]}, nombre_b)
+                st.rerun()
+            else:
+                nota("No encontré ese lugar. Prueba con otro nombre o con coordenadas (lat, lon).", "aviso")
+
+        html('<div class="fuente">O dibuja tu zona con <b>⬟ polígono</b>, <b>▭ rectángulo</b> o <b>📍 punto</b> '
              '(izquierda del mapa).</div>')
 
         respuesta = st_folium(_mapa(todas, actual), height=560, use_container_width=True, key=f"mapa_{actual}",

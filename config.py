@@ -169,7 +169,20 @@ SEMAFORO = {
 # ---------------------------------------------------------------------------
 # 7. PERFIL DE SUELO (input local del técnico)
 # ---------------------------------------------------------------------------
-TIPOS_SUELO = ["Arcilloso", "Franco", "Arenoso"]
+# Tipos de suelo: qué significa, qué le pasa si queda desnudo y si cuenta como "suelo pobre"
+SUELOS = {
+    "Arcilloso": {"nota": "retiene agua, pero se compacta.", "desnudo": "se compacta", "pobre": False},
+    "Franco": {"nota": "equilibrado: buena base para rotar.", "desnudo": None, "pobre": False},
+    "Arenoso": {"nota": "retiene poca agua. La cobertura ayuda mucho.", "desnudo": "se lava", "pobre": True},
+    "Limoso": {"nota": "fértil, pero forma costra y se erosiona.", "desnudo": "forma costra", "pobre": False},
+    "Orgánico": {"nota": "rico en materia orgánica; desnudo la pierde rápido.", "desnudo": "pierde materia orgánica",
+                 "pobre": False},
+    "Turbera": {"nota": "saturado de agua y muy ácido.", "desnudo": "se oxida y se hunde", "pobre": False,
+                "brecha": "Turbera: la yuca necesita camellones o drenaje."},
+    "Volcánico": {"nota": "retiene agua, pero fija el fósforo.", "desnudo": "se erosiona", "pobre": False,
+                  "brecha": "Volcánico: revisar fósforo en el análisis."},
+}
+TIPOS_SUELO = list(SUELOS)
 CULTIVOS_PREVIOS = ["Maíz", "Yuca", "Plátano", "Cacao", "Pasto"]
 PERFIL_INICIAL = {
     "tipo_suelo": "Arcilloso",
